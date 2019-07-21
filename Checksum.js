@@ -21,7 +21,7 @@ Checksum.defaultoptions = {
 }
 
 /**
- * Checksum - Get hash from String
+ * Checksum - Get sum from String
  * 
  *  Examples:
  * 
@@ -29,9 +29,9 @@ Checksum.defaultoptions = {
  *     
  *     if (sum == 'ed076287532e86365e841e92bfc50d8c') { console.log("Valid string!"); }
  * 
- * @param {String} [value] Value of the String to hash
+ * @param {String} [value] Value of the String to sum
  * @param {Object} [options] Options for hashing
- * @return {String} Returns the hash
+ * @return {String} Returns the sum
  */
 function Checksum(value, options = {}) {
     if (typeof options == 'object' && !Array.isArray(options)) {
@@ -55,32 +55,32 @@ function Checksum(value, options = {}) {
 }
 
 /**
- * Checksum - Get hash from File
+ * Checksum - Get sum from File
  * 
  *  Examples:
  * 
- *     var sum = Checksum.file("archive.zip", (err, hash) => {
+ *     Checksum.file("archive.zip", (err, sum) => {
  *       if (sum == 'blah') { console.log("Valid archive!"); }
  *     });
  * 
  * @constructor
  * @param {File} [file] File path to read
  * @param {Object} [options] Options for hashing (can be replaced by callback)
- * @param {Function} [callback] Callback(err, hash)
- * @return {Promise} Return Promise
+ * @param {Function} [callback] Callback(err, sum)
+ * @return {Promise} Returns a Promise
  *//**
  * @constructor
  * @param {File} [file] File path to read
- * @param {Function} [callback] Callback(err, hash)
- * @return {Promise} Return Promise
+ * @param {Function} [callback] Callback(err, sum)
+ * @return {Promise} Returns a Promise
  *//**
  * Callback
  *
  * @callback ChecksumFileCallback
  * @param {Error} [err] if Error
- * @param {String} [hash] hash (string)
+ * @param {String} [sum] sum (string)
  */
-function ChecksumFile(file, options = {}, callback = (err, hash) => {}) {
+function ChecksumFile(file, options = {}, callback = (err, sum) => {}) {
     if (typeof options == 'function') {
         callback = options;
         options = {}
@@ -106,10 +106,12 @@ function ChecksumFile(file, options = {}, callback = (err, hash) => {}) {
         Checksum.stream(fileStream, options, callback);
     });
 
-    return false; /* Promise handle not finished */
+    return new Promise((resolve, reject) => {
+        resolve(hash);
+    });
 }
 
-function ChecksumStream(stream, options = {}, callback = (err, hash) => {}) {
+function ChecksumStream(stream, options = {}, callback = (err, sum) => {}) {
     if (typeof options == 'function') {
         callback = options;
         options = {}
@@ -156,9 +158,9 @@ function ChecksumStream(stream, options = {}, callback = (err, hash) => {}) {
  *  Examples:
  * 
  *     if (Checksum.getHashes().indexOf('sha1') >= 0) {
- *       console.log('sha1 hash supported!')
+ *       console.log('sha1 hash supported!');
  *     } else {
- *       console.log('aww! sha1 hash not avalible here')
+ *       console.log('aww! sha1 hash not avalible here');
  *     }
  * 
  *  @return {Array} Returns an Array of hashes (strings)
