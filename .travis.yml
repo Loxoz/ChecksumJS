@@ -1,0 +1,23 @@
+language: node_js
+node_js:
+  # Note that eslint >=6 only support node >=8
+  - "8.16"
+  - "9.11"
+  - "10.15"
+  - "11.15"
+sudo: false
+cache:
+  directories:
+    - node_modules
+before_install:
+  # Skip updating shrinkwrap / lock
+  - npm config set shrinkwrap false
+  - npm update
+install:
+  - npm install
+before_script:
+  - npm run test:install
+  - npm run lint:install
+script:
+  - npm test
+  - npm run lint
