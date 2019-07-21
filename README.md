@@ -29,7 +29,11 @@ var defaultoptions = Checksum.defaultoptions;
  */
 var sum = Checksum("Hello World!", { algorithm: 'md5' }); /* -> ed076287532e86365e841e92bfc50d8c */
 
-if (sum == 'ed076287532e86365e841e92bfc50d8c') { console.log("Valid string!"); }
+if (sum == 'ed076287532e86365e841e92bfc50d8c') {
+    console.log("Valid string!");
+}
+
+/* Not finished, Road to 1.0.0 */
 
 /* This is easy as that! */
 ```
