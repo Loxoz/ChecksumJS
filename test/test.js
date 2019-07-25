@@ -26,4 +26,13 @@ describe('ChecksumJS', () => {
             expect(hash).toBe("f84cfac5264bf0235d64fef48f8e7f203a8e3c42b1a335a8fc342a5cbdc3a85e");
         });
     });
+    it('should support Promises (from file)', () => {
+        Checksum.fileAsync('./test/checkfiles/hello.txt', { algorithm: 'md5' })
+            .then((sum) => {
+                expect(sum).toBe("59e4f1759521d88f630a0b15dcc14f69");
+            })
+            .catch((err) => {
+                expect(false).toBeTruthy();
+            });
+    });
 });

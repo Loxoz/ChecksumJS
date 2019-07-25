@@ -15,8 +15,6 @@ const Checksum = require("./libs/Checksum.js");
 
 ### Example & Tutorial:
 
-Note: they don't actually returns Promises for this experimental commit, coming later.
-
 ```javascript
 /**
  * Global options = Checksum.defaultoptions:
@@ -43,10 +41,11 @@ if (sum == 'ed076287532e86365e841e92bfc50d8c') {
 
 /**
  * Checksum from file:
- *  Checksum.file(file,[ options,][ callback]) -> return Promise
+ *  Checksum.file(file,[ options,][ callback])
  *   {File} file           -> file to checksum
  *   {Object} [options]    -> Global options
  *   {Function} [callback] -> callback function
+ * promise: Checksum.fileAsync
  */
 Checksum.file("archive.zip", (err, sum) => {
     if (sum == 'blah') {
@@ -54,16 +53,17 @@ Checksum.file("archive.zip", (err, sum) => {
     }
 });
 
-Checksum.file("archive.zip", { algorithm: 'md5' }, (err, sum) => {
+Checksum.file("archive.7z", { algorithm: 'md5' }, (err, sum) => {
     console.log("Archive md5: " + sum);
 });
 
 /**
  * Checksum from stream:
- *  Checksum.stream(stream,[ options,][ callback]) -> return Promise
+ *  Checksum.stream(stream,[ options,][ callback])
  *   {Stream} stream       -> stream to checksum
  *   {Object} [options]    -> Global options
  *   {Function} [callback] -> callback function
+ * promise: Checksum.streamAsync
  */
 Checksum.stream(mystream, (err, sum) => {
     console.log("Sum of stream: " + sum);

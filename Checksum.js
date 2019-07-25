@@ -6,11 +6,14 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
+const { promisify } = require('util');
 
 module.exports = Checksum;
 Checksum.string = Checksum;
 Checksum.file = ChecksumFile;
+Checksum.fileAsync = promisify(Checksum.file);
 Checksum.stream = ChecksumStream;
+Checksum.streamAsync = promisify(Checksum.stream);
 
 /**
  * default config
@@ -33,7 +36,7 @@ Checksum.defaultoptions = {
  * @param {Object} [options] Options for hashing
  * @return {String} Returns the sum
  */
-function Checksum(value, options = {}) {
+function Checksum(value = String.prototype, options = {}) {
     if (typeof options == 'object' && !Array.isArray(options)) {
         options = Object.assign(Object.create(Checksum.defaultoptions), options);
     }
@@ -67,12 +70,10 @@ function Checksum(value, options = {}) {
  * @param {File} [file] File path to read
  * @param {Object} [options] Options for hashing (can be replaced by callback)
  * @param {Function} [callback] Callback(err, sum)
- * @return {Promise} Returns a Promise
  *//**
  * @constructor
  * @param {File} [file] File path to read
  * @param {Function} [callback] Callback(err, sum)
- * @return {Promise} Returns a Promise
  *//**
  * Callback
  *
@@ -80,7 +81,7 @@ function Checksum(value, options = {}) {
  * @param {Error} [err] if Error
  * @param {String} [sum] sum (string)
  */
-function ChecksumFile(file, options = {}, callback = (err, sum) => {}) {
+function ChecksumFile(file = String.prototype, options = {}, callback = (err, sum) => {}) {
     if (typeof options == 'function') {
         callback = options;
         options = {}
@@ -93,25 +94,38 @@ function ChecksumFile(file, options = {}, callback = (err, sum) => {}) {
     }
 
     fs.stat(file, (err, stat) => {
-        if (!err && !stat.isFile()) err = new Error('Not a file');
-        if (err) return callback(err);
+        if (!err && !stat.isFile()) { err = new Error('Not a file'); err.code = 'NOTFILE'; };
+        if (err) { return callback(err); };
 
-        var hash = crypto.createHash(options.algorithm);
-        var fileStream = fs.createReadStream(file);
-
-        fileStream.on('error', (err) => {
-            callback(err);
-        });
-
-        Checksum.stream(fileStream, options, callback);
-    });
-
-    return new Promise((resolve, reject) => {
-        resolve(hash);
+        return Checksum.stream(fs.createReadStream(file), options, callback);
     });
 }
 
-function ChecksumStream(stream, options = {}, callback = (err, sum) => {}) {
+/**
+ * Checksum - Get sum from stream
+ * 
+ *  Examples:
+ * 
+ *     Checksum.stream(mystream, (err, sum) => {
+ *       console.log("Sum of stream: " + sum);
+ *     });
+ * 
+ * @constructor
+ * @param {ReadableStream} [stream] Stream to read
+ * @param {Object} [options] Options for hashing (can be replaced by callback)
+ * @param {Function} [callback] Callback(err, sum)
+ *//**
+ * @constructor
+ * @param {ReadableStream} [stream] Stream to read
+ * @param {Function} [callback] Callback(err, sum)
+ *//**
+ * Callback
+ *
+ * @callback ChecksumStreamCallback
+ * @param {Error} [err] if Error
+ * @param {String} [sum] sum (string)
+ */
+function ChecksumStream(stream = fs.ReadStream.prototype, options = {}, callback = (err, sum) => {}) {
     if (typeof options == 'function') {
         callback = options;
         options = {}
@@ -126,8 +140,13 @@ function ChecksumStream(stream, options = {}, callback = (err, sum) => {}) {
     if (!stream.readable) {
         let err = new Error('Stream is not readable');
         err.code = 'STREAMNOREAD';
-        return callback(err);
+        callback(err)
+        return new Promise((resolve, reject) => { reject(err); });
     }
+
+    stream.on('error', (err) => {
+        callback(err);
+    });
 
     var hash = crypto.createHash(options.algorithm)
 
@@ -149,7 +168,7 @@ function ChecksumStream(stream, options = {}, callback = (err, sum) => {}) {
             callback(null, hash.digest(options.encoding));
         });
     }
-
+    return true;
 }
 
 /**
